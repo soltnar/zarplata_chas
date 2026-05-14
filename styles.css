@@ -60,6 +60,21 @@ h2 {
   background: linear-gradient(180deg, #f8fcfa 0%, #ffffff 100%);
 }
 
+.guideHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.guideBody {
+  margin-top: 8px;
+}
+
+.guidePanel.collapsed .guideBody {
+  display: none;
+}
+
 .guideLead {
   margin: 0 0 10px;
   color: var(--muted);
@@ -153,6 +168,13 @@ button {
   cursor: pointer;
   background: var(--accent);
   color: #fff;
+}
+
+.secondaryBtn {
+  background: #edf5f1;
+  color: #21443c;
+  border: 1px solid var(--border);
+  padding: 7px 12px;
 }
 
 button[disabled] {

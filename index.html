@@ -16,10 +16,14 @@
     </div>
     <p class="subtitle">Смена: больше 7 часов = 1, до 7 часов = 0.5. Сутки считаются с 04:00 до 03:59.</p>
 
-    <section class="panel guidePanel">
-      <h2>Как подготовить файлы в Saby</h2>
-      <p class="guideLead">Загружайте файлы за один и тот же месяц. Для удобства используйте поле «Загрузить все файлы сразу (автоопределение)».</p>
-      <ol class="guideList">
+    <section class="panel guidePanel" id="guidePanel">
+      <div class="guideHeader">
+        <h2>Как подготовить файлы в Saby</h2>
+        <button id="guideToggleBtn" type="button" class="secondaryBtn">Скрыть</button>
+      </div>
+      <div class="guideBody" id="guideBody">
+        <p class="guideLead">Загружайте файлы за один и тот же месяц. Для удобства используйте поле «Загрузить все файлы сразу (автоопределение)».</p>
+        <ol class="guideList">
         <li>
           <strong>Файл проходной</strong>:
           перейдите в <a href="https://online.saby.ru/page/work-schedule" target="_blank" rel="noopener noreferrer">Графики работ</a>,
@@ -43,8 +47,9 @@
           выберите месяц и вид начисления <strong>Премия</strong>, отметьте нужные документы,
           затем <strong>Распечатать</strong> → <strong>Приказ Т-11</strong> и сохраните PDF.
         </li>
-      </ol>
-      <p class="guideNote">Совет: если выгружаете несколько PDF с премиями, загружайте их все одновременно — сервис объединит суммы по ФИО автоматически.</p>
+        </ol>
+        <p class="guideNote">Совет: если выгружаете несколько PDF с премиями, загружайте их все одновременно — сервис объединит суммы по ФИО автоматически.</p>
+      </div>
     </section>
 
     <section class="panel uploadGrid">
@@ -123,6 +128,6 @@
     <footer class="footer">Премии можно загрузить напрямую PDF (автопарсинг) или CSV</footer>
   </main>
 
-  <script src="script.js?v=2.4.0"></script>
+  <script src="script.js?v=2.5.0"></script>
 </body>
 </html>

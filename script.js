@@ -1,5 +1,6 @@
-const APP_VERSION = "2.4.0";
+const APP_VERSION = "2.5.0";
 const DAY_CUTOFF_SECONDS = 4 * 3600;
+const GUIDE_STORAGE_KEY = "saby-guide-collapsed";
 
 const attendanceInput = document.getElementById("attendanceInput");
 const staffInput = document.getElementById("staffInput");
@@ -15,6 +16,8 @@ const xlsxBtn = document.getElementById("xlsxBtn");
 const summaryEl = document.getElementById("summary");
 const tableBody = document.querySelector("#resultTable tbody");
 const appVersionEl = document.getElementById("appVersion");
+const guidePanelEl = document.getElementById("guidePanel");
+const guideToggleBtn = document.getElementById("guideToggleBtn");
 
 let baseRecords = [];
 let mappedRecords = [];
@@ -28,6 +31,27 @@ let mappingStats = { matched: 0, total: 0 };
 let lastResultRows = [];
 
 appVersionEl.textContent = APP_VERSION;
+
+function setGuideCollapsed(collapsed) {
+  if (!guidePanelEl || !guideToggleBtn) return;
+  guidePanelEl.classList.toggle("collapsed", collapsed);
+  guideToggleBtn.textContent = collapsed ? "Показать" : "Скрыть";
+  try {
+    localStorage.setItem(GUIDE_STORAGE_KEY, collapsed ? "1" : "0");
+  } catch (_) {}
+}
+
+if (guidePanelEl && guideToggleBtn) {
+  let collapsed = false;
+  try {
+    collapsed = localStorage.getItem(GUIDE_STORAGE_KEY) === "1";
+  } catch (_) {}
+  setGuideCollapsed(collapsed);
+  guideToggleBtn.addEventListener("click", () => {
+    const isCollapsed = guidePanelEl.classList.contains("collapsed");
+    setGuideCollapsed(!isCollapsed);
+  });
+}
 
 if (window.pdfjsLib) {
   window.pdfjsLib.GlobalWorkerOptions.workerSrc = "./vendor/pdf.worker.min.js";
