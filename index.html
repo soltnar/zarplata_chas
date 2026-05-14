@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Зарплата персонала по сменам</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="./vendor/pdf.min.js"></script>
+</head>
+<body>
+  <main class="app">
+    <div class="titleRow">
+      <h1>Зарплата сотрудников по сменам (месяц)</h1>
+      <span class="versionBadge">Версия: <span id="appVersion"></span></span>
+    </div>
+    <p class="subtitle">Смена: больше 7 часов = 1, до 7 часов = 0.5. Сутки считаются с 04:00 до 03:59.</p>
+
+    <section class="panel uploadGrid">
+      <div>
+        <label class="label" for="allFilesInput">Загрузить все файлы сразу (автоопределение)</label>
+        <input id="allFilesInput" type="file" accept=".xlsx,.xls,.csv,text/csv,.pdf,application/pdf" multiple />
+      </div>
+      <div></div>
+      <div>
+        <label class="label" for="attendanceInput">Файл проходной</label>
+        <input id="attendanceInput" type="file" accept=".xlsx,.xls" />
+      </div>
+      <div>
+        <label class="label" for="staffInput">Список сотрудников (ФИО → ресторан)</label>
+        <input id="staffInput" type="file" accept=".xlsx,.xls" />
+      </div>
+      <div>
+        <label class="label" for="payrollInput">Файл начислений (Начисления + НДФЛ)</label>
+        <input id="payrollInput" type="file" accept=".xlsx,.xls" />
+      </div>
+      <div>
+        <label class="label" for="premiumInput">Файл премий CSV или PDF (по ФИО)</label>
+        <input id="premiumInput" type="file" accept=".csv,text/csv,.pdf,application/pdf" multiple />
+      </div>
+      <p id="status" class="status">Загрузите файл проходной.</p>
+    </section>
+
+    <section class="panel filters">
+      <div>
+        <label class="label" for="dateSelect">Месяц (мультивыбор)</label>
+        <select id="dateSelect" multiple size="6"></select>
+      </div>
+
+      <div>
+        <label class="label" for="restaurantSelect">Рестораны (мультивыбор)</label>
+        <select id="restaurantSelect" multiple size="10"></select>
+      </div>
+
+      <div>
+        <span class="label">Категории персонала</span>
+        <label class="check"><input type="checkbox" class="groupCheck" value="Кухня" checked> Кухня</label>
+        <label class="check"><input type="checkbox" class="groupCheck" value="Зал" checked> Зал</label>
+        <label class="check"><input type="checkbox" class="groupCheck" value="Доставка" checked> Доставка</label>
+        <label class="check"><input type="checkbox" class="groupCheck" value="Бар" checked> Бар</label>
+      </div>
+    </section>
+
+    <section class="panel actions">
+      <button id="calcBtn">Рассчитать</button>
+      <button id="csvBtn" disabled>Скачать CSV</button>
+      <button id="xlsxBtn" disabled>Скачать Excel</button>
+    </section>
+
+    <section class="panel">
+      <div id="summary" class="summary">Нет данных для отображения.</div>
+      <div class="tableWrap">
+        <table id="resultTable">
+          <thead>
+            <tr>
+              <th>Месяц</th>
+              <th>Ресторан</th>
+              <th>Категория персонала</th>
+              <th>ФИО</th>
+              <th>Должность</th>
+              <th>Количество смен</th>
+              <th>Начисления</th>
+              <th>НДФЛ</th>
+              <th>Премии</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="footer">Премии можно загрузить напрямую PDF (автопарсинг) или CSV</footer>
+  </main>
+
+  <script src="script.js?v=2.4.0"></script>
+</body>
+</html>
