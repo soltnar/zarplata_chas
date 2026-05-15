@@ -452,12 +452,14 @@ function calculate(records) {
         person: day.person,
         personKey: day.personKey,
         roleCounts: new Map(),
-        shifts: 0
+        shifts: 0,
+        workedSeconds: 0
       });
     }
 
     const row = personMonth.get(monthKey);
     row.shifts += shift;
+    row.workedSeconds += calcWorkedSeconds(day.events);
     day.roles.forEach((count, role) => {
       row.roleCounts.set(role, (row.roleCounts.get(role) || 0) + count);
     });
@@ -474,6 +476,7 @@ function calculate(records) {
         person: r.person,
         role: pickMainRole(r.roleCounts),
         shifts: r.shifts,
+        hours: r.workedSeconds / 3600,
         salary: salary.salary,
         ndfl: salary.ndfl,
         netSalary: salary.salary - salary.ndfl,
@@ -498,6 +501,7 @@ function renderTable(rows) {
   }
 
   let totalShifts = 0;
+  let totalHours = 0;
   let totalSalary = 0;
   let totalNdfl = 0;
   let totalNetSalary = 0;
@@ -505,6 +509,7 @@ function renderTable(rows) {
 
   rows.forEach((r) => {
     totalShifts += r.shifts;
+    totalHours += r.hours;
     totalSalary += r.salary;
     totalNdfl += r.ndfl;
     totalNetSalary += r.netSalary;
@@ -518,6 +523,7 @@ function renderTable(rows) {
       <td>${escapeHtml(r.person)}</td>
       <td>${escapeHtml(r.role)}</td>
       <td>${r.shifts}</td>
+      <td>${formatMoney(r.hours)}</td>
       <td>${formatMoney(r.salary)}</td>
       <td>${formatMoney(r.ndfl)}</td>
       <td>${formatMoney(r.netSalary)}</td>
@@ -526,13 +532,13 @@ function renderTable(rows) {
     tableBody.appendChild(tr);
   });
 
-  summaryEl.textContent = `Строк: ${rows.length}. Смен: ${totalShifts}. Начисления: ${formatMoney(totalSalary)}. НДФЛ: ${formatMoney(totalNdfl)}. З/п на руки: ${formatMoney(totalNetSalary)}. Премии: ${formatMoney(totalPremium)}.`;
+  summaryEl.textContent = `Строк: ${rows.length}. Смен: ${totalShifts}. Часов: ${formatMoney(totalHours)}. Начисления: ${formatMoney(totalSalary)}. НДФЛ: ${formatMoney(totalNdfl)}. З/п на руки: ${formatMoney(totalNetSalary)}. Премии: ${formatMoney(totalPremium)}.`;
   csvBtn.disabled = false;
   xlsxBtn.disabled = false;
 }
 
 function toCSV(rows) {
-  const head = ["Месяц", "Ресторан", "Категория персонала", "ФИО", "Должность", "Количество смен", "Начисления", "НДФЛ", "З/п на руки", "Премии"];
+  const head = ["Месяц", "Ресторан", "Категория персонала", "ФИО", "Должность", "Количество смен", "Часы", "Начисления", "НДФЛ", "З/п на руки", "Премии"];
   const lines = [head.join(";")];
   rows.forEach((r) => {
     lines.push([
@@ -542,6 +548,7 @@ function toCSV(rows) {
       `"${String(r.person).replaceAll('"', '""')}"`,
       `"${String(r.role).replaceAll('"', '""')}"`,
       r.shifts,
+      formatMoney(r.hours),
       formatMoney(r.salary),
       formatMoney(r.ndfl),
       formatMoney(r.netSalary),
@@ -553,9 +560,9 @@ function toCSV(rows) {
 
 function exportExcel(rows) {
   const wb = XLSX.utils.book_new();
-  const aoa = [["Месяц", "Ресторан", "Категория персонала", "ФИО", "Должность", "Количество смен", "Начисления", "НДФЛ", "З/п на руки", "Премии"]];
+  const aoa = [["Месяц", "Ресторан", "Категория персонала", "ФИО", "Должность", "Количество смен", "Часы", "Начисления", "НДФЛ", "З/п на руки", "Премии"]];
   rows.forEach((r) => {
-    aoa.push([r.month, r.restaurant, r.group, r.person, r.role, r.shifts, r.salary, r.ndfl, r.netSalary, r.premium]);
+    aoa.push([r.month, r.restaurant, r.group, r.person, r.role, r.shifts, r.hours, r.salary, r.ndfl, r.netSalary, r.premium]);
   });
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), "Отчет");
   XLSX.writeFile(wb, `зарплата_по_сотрудникам_${new Date().toISOString().slice(0, 10)}.xlsx`);
