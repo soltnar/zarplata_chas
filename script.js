@@ -1,6 +1,17 @@
-const APP_VERSION = "2.6.1";
+const APP_VERSION = "2.6.2";
 const DAY_CUTOFF_SECONDS = 4 * 3600;
 const GUIDE_STORAGE_KEY = "saby-guide-collapsed";
+const STAFF_FIO_HEADERS = ["ФИО", "Сотрудник", "Фамилия Имя Отчество"];
+const STAFF_RESTAURANT_HEADERS = [
+  "Название подразделения",
+  "Подразделение",
+  "Основное подразделение",
+  "Текущее подразделение",
+  "Отдел",
+  "Название отдела",
+  "Рабочая группа",
+  "Ресторан"
+];
 
 const attendanceInput = document.getElementById("attendanceInput");
 const staffInput = document.getElementById("staffInput");
@@ -134,6 +145,15 @@ function findHeaderIndex(header, candidates) {
   return -1;
 }
 
+function findHeaderRow(rows, matcher, maxRows = 25) {
+  const limit = Math.min(rows.length, maxRows);
+  for (let i = 0; i < limit; i += 1) {
+    const header = rows[i].map((h) => String(h).trim());
+    if (matcher(header)) return { header, rowIndex: i };
+  }
+  return { header: [], rowIndex: -1 };
+}
+
 function toNum(v) {
   if (v === null || v === undefined || v === "") return 0;
   if (typeof v === "number") return Number.isFinite(v) ? v : 0;
@@ -155,18 +175,21 @@ function parseStaffWorkbook(arrayBuffer) {
   const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true, defval: "" });
   if (!rows.length) throw new Error("Файл сотрудников пустой.");
 
-  const header = rows[0].map((h) => String(h).trim());
-  const fioIdx = header.indexOf("ФИО");
-  const restaurantIdx = header.indexOf("Название подразделения");
+  const { header, rowIndex } = findHeaderRow(rows, (candidateHeader) => (
+    findHeaderIndex(candidateHeader, STAFF_FIO_HEADERS) !== -1 &&
+    findHeaderIndex(candidateHeader, STAFF_RESTAURANT_HEADERS) !== -1
+  ));
+  const fioIdx = findHeaderIndex(header, STAFF_FIO_HEADERS);
+  const restaurantIdx = findHeaderIndex(header, STAFF_RESTAURANT_HEADERS);
   if (fioIdx === -1 || restaurantIdx === -1) {
-    throw new Error("В файле сотрудников нужны колонки: ФИО и Название подразделения.");
+    throw new Error("В файле сотрудников нужны колонки с ФИО и подразделением/рестораном.");
   }
 
   const map = new Map();
   let conflicts = 0;
   const conflictKeys = new Set();
 
-  for (let i = 1; i < rows.length; i += 1) {
+  for (let i = rowIndex + 1; i < rows.length; i += 1) {
     const fio = String(rows[i][fioIdx] || "").trim();
     const restaurant = String(rows[i][restaurantIdx] || "").trim();
     if (!fio || !restaurant) continue;
@@ -643,15 +666,16 @@ async function applyPremiumFromFiles(files) {
 
 function detectWorkbookKindFromRows(rows) {
   if (!rows.length) return "unknown";
-  const header = rows[0].map((h) => normalize(String(h)));
 
-  const has = (name) => header.includes(normalize(name));
-  const hasAll = (names) => names.every(has);
+  const hasHeaders = (candidates) => {
+    const found = findHeaderRow(rows, (header) => candidates.every((names) => findHeaderIndex(header, names) !== -1));
+    return found.rowIndex !== -1;
+  };
 
-  if (hasAll(["Дата", "Время", "Источник", "Направление"])) return "attendance";
-  if (hasAll(["ФИО", "Название подразделения"])) return "staff";
-  if (hasAll(["Название", "Начисления", "НДФЛ"])) return "payroll";
-  if (hasAll(["ФИО", "Премии"]) || hasAll(["ФИО", "Премия"])) return "premium_csv_like";
+  if (hasHeaders([["Дата"], ["Время"], ["Источник"], ["Направление"]])) return "attendance";
+  if (hasHeaders([["Название", "ФИО", "Сотрудник"], ["Начисления", "Оклад"], ["НДФЛ"]])) return "payroll";
+  if (hasHeaders([STAFF_FIO_HEADERS, STAFF_RESTAURANT_HEADERS])) return "staff";
+  if (hasHeaders([["ФИО"], ["Премии", "Премия"]])) return "premium_csv_like";
   return "unknown";
 }
 
