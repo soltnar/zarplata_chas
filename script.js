@@ -1,4 +1,4 @@
-const APP_VERSION = "2.6.0";
+const APP_VERSION = "2.6.1";
 const DAY_CUTOFF_SECONDS = 4 * 3600;
 const GUIDE_STORAGE_KEY = "saby-guide-collapsed";
 
@@ -91,7 +91,7 @@ function normalizeFio(text) {
 function classifyRole(roleText) {
   const role = normalize(roleText);
   if (/повар|шеф/.test(role)) return "Кухня";
-  if (/официант|менеджер зала|мойщ|мойк/.test(role)) return "Зал";
+  if (/официант|менеджер зала|мойщ|мойк|администратор|кассир|оператор/.test(role)) return "Зал";
   if (/логист|курьер|водител/.test(role)) return "Доставка";
   if (/барменедж|барбэк|барбек|бармен/.test(role)) return "Бар";
   return null;
